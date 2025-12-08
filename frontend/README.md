@@ -1,73 +1,34 @@
-# React + TypeScript + Vite
+# Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is a robust Single Page Application (SPA) built with **React 19** and **TypeScript**, bundled using **Vite**. It provides an interactive dashboard for managing and visualizing large-scale retail sales data.
 
-Currently, two official plugins are available:
+## Overview
+The application focuses on performance and user experience, featuring server-side pagination, sorting, and filtering to handle large datasets efficiently. The UI is built with **Tailwind CSS** for responsiveness and a modern aesthetic.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+- **Core**: React 19, TypeScript
+- **Build Tool**: Vite
+- **Routing**: React Router DOM
+- **Styling**: Tailwind CSS, `clsx`, `tailwind-merge`
+- **Icons**: Lucide React
 
-## React Compiler
+## Project Structure
+The codebase follows a modular architecture:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **`src/routes`**: Top-level page components (e.g., `Dashboard`).
+- **`src/components`**: Reusable UI blocks (e.g., `DataTable`, `FilterPanel`).
+- **`src/hooks`**: Encapsulated business logic (e.g., `useSalesData`).
+- **`src/services`**: Type-safe API client functions.
+- **`src/utils`**: Shared helper functions.
+- **`src/styles`**: Global CSS configurations.
 
-## Expanding the ESLint configuration
+## Key Features
+- **Dynamic DataTable**: Supports sorting by multiple columns.
+- **Advanced Filtering**: Filter by multiple criteria (Region, Gender, Date, etc.) simultaneously.
+- **Debounced Search**: Optimized search functionality to reduce API calls.
+- **State Management**: URL-based state synchronization for shareable inputs.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Scripts
+- `npm run dev`: Starts the development server.
+- `npm run build`: Compiles the application for production.
+- `npm run lint`: Runs ESLint for code quality checks.

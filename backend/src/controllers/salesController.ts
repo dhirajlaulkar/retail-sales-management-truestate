@@ -25,14 +25,12 @@ export const getSales = async (req: Request, res: Response) => {
         const conditions: string[] = [];
         const params: any[] = [];
 
-        // Search
         if (search) {
             conditions.push('(lower(customer_name) LIKE ? OR phone_number LIKE ?)');
             const searchTerm = `%${String(search).toLowerCase()}%`;
             params.push(searchTerm, searchTerm);
         }
 
-        // Filters
         if (region) {
             const regions = String(region).split(',');
             conditions.push(`customer_region IN (${regions.map(() => '?').join(',')})`);
@@ -78,11 +76,9 @@ export const getSales = async (req: Request, res: Response) => {
 
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-        // Count Total
         const countResult = await db.get(`SELECT count(*) as count FROM sales ${whereClause}`, params);
         const total = countResult.count;
 
-        // Fetch Data
         const allowedSorts = ['date', 'quantity', 'customer_name', 'total_amount'];
         const safeSortBy = allowedSorts.includes(String(sortBy)) ? String(sortBy) : 'date';
         const safeSortOrder = String(sortOrder).toLowerCase() === 'asc' ? 'ASC' : 'DESC';

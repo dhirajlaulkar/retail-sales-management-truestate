@@ -3,3 +3,5 @@ dist
 .env
 .DS_Store
 coverage
+truestate_assignment_dataset.csv
+database.sqlite

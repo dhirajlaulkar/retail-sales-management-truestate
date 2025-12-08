@@ -1,48 +1,53 @@
 # Retail Sales Management System
 
-## Overview
-A high-performance full-stack application for managing and analyzing retail sales data. It efficiently handles a 1-million-record dataset with advanced search, filtering, and sorting capabilities.
+## 1. Overview
+A robust Retail Sales Management System designed to handle large datasets with efficiency. It features a responsive dashboard for visualizing sales data, equipped with advanced filtering, searching, and sorting capabilities. The system ensures accurate data processing and provides a seamless user experience through a modular, type-safe architecture.
 
-## Tech Stack
-- **Frontend**: Vite, React, TypeScript, Tailwind CSS
-- **Backend**: Node.js, Express, SQLite, CSV Parser
+## 2. Tech Stack
+*   **Frontend**: React 19, TypeScript, Vite, React Router, Tailwind CSS.
+*   **Backend**: Node.js, Express, SQLite.
+*   **Utilities**: `clsx`, `tailwind-merge` for styling; `lucide-react` for icons.
 
-## Search Implementation Summary
-- **Full-Text Search**: SQL `LIKE` queries allow partial matching on Customer Name and Phone Number.
-- **Case-Insensitive**: Handled via SQL `lower()` function.
-- **Debounced**: Frontend debounces input by 500ms to optimize performance.
+## 3. Search Implementation Summary
+Implemented a debounced search (500ms) that targets Customer Name and Phone Number. The search term is synchronized with the URL `searchParams`, allowing for shareable links. On the backend, this translates to parameterized SQL queries using `LIKE` operators to ensure security and performance.
 
-## Filter Implementation Summary
-- **Multi-Select**: Supports multiple selections for Region, Category, Payment Method, and Gender.
-- **Combination**: Filters are combined using `AND` logic, with values within a filter combined using `IN`.
-- **Date/Age Range**: numeric range queries handled via SQL comparison (`>=`, `<=`).
+## 4. Filter Implementation Summary
+Features a comprehensive filtering system for Region, Gender, Category, Payment Method, Tags, and ranges for Age and Date. Filters are additive, managed via URL parameters, and validated on the frontend (e.g., preventing negative age inputs). The backend dynamically constructs SQL `WHERE` clauses based on active filters.
 
-## Sorting Implementation Summary
-- **Server-Side**: Sorting is performed at the database level (`ORDER BY`) to ensure correctness across paginated data.
-- **Fields**: Date, Quantity, Customer Name, Total Amount.
+## 5. Sorting Implementation Summary
+Server-side sorting is implemented for key columns: Date, Quantity, Total Amount, and Customer Name. Users can toggle sort direction (ASC/DESC). The state is preserved in the URL, and the backend safely validates sort columns against an allowlist before executing the `ORDER BY` SQL clause.
 
-## Pagination Implementation Summary
-- **Strategy**: SQL `LIMIT` and `OFFSET` for efficient data retrieval.
-- **State**: Current page is persisted in the URL. Reset to page 1 on filter/search change.
+## 6. Pagination Implementation Summary
+Utilizes efficient server-side pagination using SQL `LIMIT` and `OFFSET`. The frontend calculates the total pages based on metadata returned by the API (`total`, `page`, `limit`). This ensures the application remains performant and responsive regardless of the total dataset size.
 
-## Setup Instructions
+## 7. Setup Instructions
 
-### Prerequisites
-- Node.js (v18+)
-- npm
+### Backend
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+    The server runs on `http://localhost:5000`.
 
-### 1. Backend Setup
-```bash
-cd backend
-npm install
-npm run start
-```
-*Note: On first run, the server will download the 1M record dataset and import it into SQLite. This may take a few minutes.*
-
-### 2. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Access the application at `http://localhost:5173`.
+### Frontend
+1.  Navigate to the frontend directory:
+    ```bash
+    cd frontend
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+    The application runs on `http://localhost:5173`.

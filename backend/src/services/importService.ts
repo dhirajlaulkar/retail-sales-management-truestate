@@ -5,14 +5,13 @@ import csv from 'csv-parser';
 import { getDB } from './db';
 
 const DATA_DIR = path.join(__dirname, '../../data');
-const CSV_FILE = path.join(DATA_DIR, 'sales_data.csv');
+const CSV_FILE = path.join(DATA_DIR, 'truestate_assignment_dataset.csv');
 const DOWNLOAD_URL = 'https://drive.google.com/uc?id=1tzbyuxBmrBwMSXbL22r33FUMtO0V_lxb&export=download';
 
 const downloadFile = (url: string, dest: string): Promise<void> => {
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(dest);
         https.get(url, (response) => {
-            // Handle redirects (Google Drive often redirects)
             if (response.statusCode === 302 || response.statusCode === 303) {
                 downloadFile(response.headers.location!, dest).then(resolve).catch(reject);
                 return;
@@ -32,7 +31,6 @@ const downloadFile = (url: string, dest: string): Promise<void> => {
 export const importData = async () => {
     const db = await getDB();
 
-    // Check if data exists
     const countResult = await db.get('SELECT count(*) as count FROM sales');
     if (countResult.count > 0) {
         console.log('Data already exists in DB. Skipping import.');
@@ -77,7 +75,6 @@ export const importData = async () => {
             )
           `);
 
-                    // Batch insert for performance
                     for (const row of results) {
                         await stmt.run(
                             row['Customer ID'], row['Customer Name'], row['Phone Number'], row['Gender'], parseInt(row['Age']), row['Customer Region'], row['Customer Type'],

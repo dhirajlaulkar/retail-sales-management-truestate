@@ -5,17 +5,17 @@ import path from 'path';
 let db: Database | null = null;
 
 export const getDB = async () => {
-    if (db) return db;
-    db = await open({
-        filename: path.join(__dirname, '../../database.sqlite'),
-        driver: sqlite3.Database
-    });
-    return db;
+  if (db) return db;
+  db = await open({
+    filename: path.join(__dirname, '../../database.sqlite'),
+    driver: sqlite3.Database
+  });
+  return db;
 };
 
 export const initDB = async () => {
-    const database = await getDB();
-    await database.exec(`
+  const database = await getDB();
+  await database.exec(`
     CREATE TABLE IF NOT EXISTS sales (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       customer_id TEXT,
@@ -46,8 +46,7 @@ export const initDB = async () => {
     );
   `);
 
-    // Create indices for frequent search/filter columns
-    await database.exec(`
+  await database.exec(`
     CREATE INDEX IF NOT EXISTS idx_customer_name ON sales(customer_name);
     CREATE INDEX IF NOT EXISTS idx_phone_number ON sales(phone_number);
     CREATE INDEX IF NOT EXISTS idx_customer_region ON sales(customer_region);
@@ -56,5 +55,5 @@ export const initDB = async () => {
     CREATE INDEX IF NOT EXISTS idx_payment_method ON sales(payment_method);
   `);
 
-    console.log('Database initialized');
+  console.log('Database initialized');
 };

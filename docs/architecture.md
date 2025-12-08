@@ -1,56 +1,75 @@
-# Architecture Documentation
+# System Architecture
 
-## 1. Overview
-The Retail Sales Management System is a full-stack web application designed to handle large datasets (1 million records) of sales transactions. It provides advanced search, filtering, sorting, and pagination capabilities.
-- **Frontend**: Vite + React + TypeScript + Tailwind CSS
-- **Backend**: Node.js + Express + TypeScript + SQLite
+## 1. Backend Architecture
+The backend is built using **Node.js** with the **Express** framework, utilizing **SQLite** for data persistence. It follows a clean MVC-style layered architecture (minus the 'View').
 
-## 2. Technical Architecture
+*   **Runtime**: Node.js
+*   **Framework**: Express.js
+*   **Database**: SQLite (managed via `sqlite3` and `sqlite` wrapper)
+*   **Pattern**: Route-Controller-Service
 
-### 2.1 Backend Architecture
-The backend is structured as a REST API using Express.js.
-- **Database**: SQLite is used for its self-contained, serverless, and transactional SQL engine, allowing efficient querying (indexing, LIMIT/OFFSET) without external dependencies.
-- **Data Import**: Upon server start, the system checks for `data/sales_data.csv`. If missing, it downloads it. If the DB is empty, it streams the CSV and bulk inserts records into SQLite within a transaction.
-- **Controller Layer**: Handles HTTP requests, extracting query parameters for filtering, sorting, and pagination.
-- **Service Layer**:
-    - `db.ts`: Manages SQLite connection and schema initialization.
-    - `importService.ts`: Handles CSV downloading and parsing.
+## 2. Frontend Architecture
+The frontend is a Single Page Application (SPA) built with **React**, bundled by **Vite**. It uses a modular, component-based architecture with custom hooks for business logic separation.
 
-### 2.2 Frontend Architecture
-The frontend is a Single Page Application (SPA) built with React.
-- **State Management**: URL Search Params (`react-router-dom`) are the source of truth for application state (search, filter, page). This ensures shareable URLs and browser history support.
-- **Components**:
-    - `App.tsx`: Main controller, synchronizes URL state with API requests.
-    - `DataTable`: Presentational component for the grid.
-    - `FilterPanel`: Handles multi-select filters using checkboxes.
-    - `SearchBar`: Debounced input for text search.
-- **Styling**: Utility-first CSS with Tailwind.
+*   **Framework**: React 19
+*   **Build Tool**: Vite
+*   **Language**: TypeScript
+*   **Routing**: React Router DOM
+*   **Styling**: Tailwind CSS (with utility helpers) / Vanilla CSS in `styles/`
 
-### 2.3 Data Flow
-1. **User Action**: User types in search or selects a filter.
-2. **URL Update**: `App.tsx` updates the URL query parameters (e.g., `?region=North&page=1`).
-3. **API Request**: A `useEffect` hook triggers `fetchSales(params)` when URL changes.
-4. **Backend Processing**: Express parses params -> builds SQL query -> SQLite returns paginated results.
-5. **UI Update**: Frontend receives JSON response and updates the `sales` state.
+## 3. Data Flow
 
-## 3. Folder Structure
+### Request Lifecycle
+1.  **User Action**: User interacts with UI (e.g., changes a filter).
+2.  **Event Handler**: Component calls a handler function from `useSalesFilters` hook.
+3.  **State Update**: `searchParams` are updated in the URL.
+4.  **Effect Trigger**: `useSalesData` hook detects `searchParams` change and calls `api.ts` service.
+5.  **API Request**: Frontend Service (`fetchSales`) sends HTTP GET request to Backend Route (`/api/sales`).
+6.  **Route Dispatch**: Backend Router delegates to `salesController`.
+7.  **Controller Logic**: Controller parses query params and constructs SQL parameters.
+8.  **Database Query**: `db` service executes SQL against SQLite.
+9.  **Response**: Data is returned to Frontend.
+10. **Render**: React state updates, re-rendering `Dashboard` and `DataTable`.
+
+## 4. Folder Structure
+
 ```
 root/
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/ (Request handling)
-│   │   ├── services/ (DB logic, Import logic)
-│   │   ├── routes/ (API definitions)
-│   │   └── index.ts (Entry point)
+│   │   ├── controllers/   # Request handling logic
+│   │   ├── models/        # (Reserved for data models)
+│   │   ├── routes/        # API route definitions
+│   │   ├── services/      # Business logic & DB access
+│   │   ├── utils/         # Helper functions
+│   │   └── index.ts       # Entry point
+│   ├── package.json
+│   └── README.md
+│
 ├── frontend/
 │   ├── src/
-│   │   ├── components/ (UI building blocks)
-│   │   ├── services/ (API fetchers)
-│   │   ├── types/ (TS interfaces)
-│   │   └── App.tsx (Main logic)
+│   │   ├── components/    # Reusable UI (DataTable, FilterPanel)
+│   │   ├── hooks/         # Custom logic (useSalesData)
+│   │   ├── routes/        # Page components (Dashboard)
+│   │   ├── services/      # API client functions
+│   │   ├── styles/        # Global CSS
+│   │   ├── utils/         # Helpers (cn, formatting)
+│   │   └── App.tsx        # Routing configuration
+│   └── package.json
+└── docs/
+    └── architecture.md    # This file
 ```
 
-## 4. Design Decisions
-- **Why SQLite?**: Handling 1M records in-memory in Node.js can cause GC pauses and high RAM usage. SQLite allows efficient disk-based querying with indices, keeping the Node.js process lightweight.
-- **Why URL State?**: Essential for deep-linking and "maintain state" requirement across reloads.
-- **Debouncing**: Search input is debounced (500ms) to prevent excessive API calls.
+## 5. Module Responsibilities
+
+### Backend
+*   **Controllers**: Handle HTTP requests/responses, validate inputs, orchestrate services.
+*   **Services**: Encapsulate business logic and direct database interactions.
+*   **Routes**: Map HTTP endpoints to controller methods.
+
+### Frontend
+*   **Components**: Pure presentational units (ui-centric, no complex business logic).
+*   **Routes (Pages)**: Composition roots that assemble components and provide data via hooks.
+*   **Hooks**: specific encapsulation of stateful logic (e.g., filter management, data fetching).
+*   **Services**: Typed wrappers for HTTP calls to the backend.
+*   **Utils**: shared, stateless helper functions.
