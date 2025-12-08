@@ -31,6 +31,10 @@ The frontend is a Single Page Application (SPA) built with **React**, bundled by
 9.  **Response**: Data is returned to Frontend.
 10. **Render**: React state updates, re-rendering `Dashboard` and `DataTable`.
 
+
+
+![Architecture Diagram](assets/architecture_diagram.png)
+
 ## 4. Folder Structure
 
 ```
