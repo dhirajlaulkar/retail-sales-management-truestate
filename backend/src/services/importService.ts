@@ -50,16 +50,29 @@ export const importData = async () => {
     console.log('Starting CSV Import...');
     const results: any[] = [];
 
-    return new Promise<void>((resolve, reject) => {
-        fs.createReadStream(CSV_FILE)
-            .pipe(csv())
-            .on('data', (data) => results.push(data))
-            .on('end', async () => {
-                try {
-                    console.log(`Parsed ${results.length} rows. Inserting into DB...`);
+    const MAX_ROWS = 10000;
+    let rowCount = 0;
 
-                    await db.run('BEGIN TRANSACTION');
-                    const stmt = await db.prepare(`
+    return new Promise<void>((resolve, reject) => {
+        const stream = fs.createReadStream(CSV_FILE).pipe(csv());
+
+        stream.on('data', (data) => {
+            if (rowCount < MAX_ROWS) {
+                results.push(data);
+                rowCount++;
+            } else {
+                stream.destroy();
+            }
+        });
+
+        const onFinish = async () => {
+            try {
+                // If stream destroyed early, we might have partial data which is fine.
+                // We proceed to insert whatever we have.
+                console.log(`Parsed ${results.length} rows. Inserting into DB...`);
+
+                await db.run('BEGIN TRANSACTION');
+                const stmt = await db.prepare(`
             INSERT INTO sales (
               customer_id, customer_name, phone_number, gender, age, customer_region, customer_type,
               product_id, product_name, brand, product_category, tags,
@@ -75,24 +88,29 @@ export const importData = async () => {
             )
           `);
 
-                    for (const row of results) {
-                        await stmt.run(
-                            row['Customer ID'], row['Customer Name'], row['Phone Number'], row['Gender'], parseInt(row['Age']), row['Customer Region'], row['Customer Type'],
-                            row['Product ID'], row['Product Name'], row['Brand'], row['Product Category'], row['Tags'],
-                            parseInt(row['Quantity']), parseFloat(row['Price per Unit']), parseFloat(row['Discount Percentage']), parseFloat(row['Total Amount']), parseFloat(row['Final Amount']),
-                            row['Date'], row['Payment Method'], row['Order Status'], row['Delivery Type'],
-                            row['Store ID'], row['Store Location'], row['Salesperson ID'], row['Employee Name']
-                        );
-                    }
-                    await stmt.finalize();
-                    await db.run('COMMIT');
-                    console.log('Import complete.');
-                    resolve();
-                } catch (error) {
-                    await db.run('ROLLBACK');
-                    console.error('Import failed:', error);
-                    reject(error);
+                for (const row of results) {
+                    await stmt.run(
+                        row['Customer ID'], row['Customer Name'], row['Phone Number'], row['Gender'], parseInt(row['Age']), row['Customer Region'], row['Customer Type'],
+                        row['Product ID'], row['Product Name'], row['Brand'], row['Product Category'], row['Tags'],
+                        parseInt(row['Quantity']), parseFloat(row['Price per Unit']), parseFloat(row['Discount Percentage']), parseFloat(row['Total Amount']), parseFloat(row['Final Amount']),
+                        row['Date'], row['Payment Method'], row['Order Status'], row['Delivery Type'],
+                        row['Store ID'], row['Store Location'], row['Salesperson ID'], row['Employee Name']
+                    );
                 }
-            });
+                await stmt.finalize();
+                await db.run('COMMIT');
+                console.log('Import complete.');
+                resolve();
+            } catch (error) {
+                await db.run('ROLLBACK');
+                console.error('Import failed:', error);
+                reject(error);
+            }
+        };
+
+        // If stream ends naturally or is destroyed (which emits close)
+        stream.on('end', onFinish);
+        stream.on('close', onFinish);
+        stream.on('error', (err) => reject(err));
     });
 };
