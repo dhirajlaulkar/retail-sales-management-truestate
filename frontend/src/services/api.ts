@@ -1,6 +1,8 @@
 import { SalesResponse, FilterOptions } from '../types';
 
-const API_URL = 'http://localhost:5000/api/sales';
+import { API_URL as BASE_URL } from '../config';
+
+const API_URL = `${BASE_URL}/api/sales`;
 
 export const fetchSales = async (params: URLSearchParams): Promise<SalesResponse> => {
     const response = await fetch(`${API_URL}?${params.toString()}`);
