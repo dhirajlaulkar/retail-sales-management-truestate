@@ -13,7 +13,11 @@ app.use(express.json());
 app.use('/api/sales', salesRoutes);
 
 app.get('/health', (req, res) => {
-    res.send('API is healthy');
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
 });
 
 const startServer = async () => {
