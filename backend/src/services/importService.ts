@@ -50,7 +50,7 @@ export const importData = async () => {
     console.log('Starting CSV Import...');
     const results: any[] = [];
 
-    const MAX_ROWS = 10000;
+    const MAX_ROWS = 100000;
     let rowCount = 0;
 
     return new Promise<void>((resolve, reject) => {
@@ -67,8 +67,7 @@ export const importData = async () => {
 
         const onFinish = async () => {
             try {
-                // If stream destroyed early, we might have partial data which is fine.
-                // We proceed to insert whatever we have.
+
                 console.log(`Parsed ${results.length} rows. Inserting into DB...`);
 
                 await db.run('BEGIN TRANSACTION');
@@ -108,7 +107,7 @@ export const importData = async () => {
             }
         };
 
-        // If stream ends naturally or is destroyed (which emits close)
+
         stream.on('end', onFinish);
         stream.on('close', onFinish);
         stream.on('error', (err) => reject(err));
